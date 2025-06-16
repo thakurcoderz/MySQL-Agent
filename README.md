@@ -27,7 +27,9 @@ cd MySQL-Agent
 
 2. Install required dependencies:
 ```bash
-pip install python-dotenv aiomysql openai
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 3. Create a `.env` file in the project root with the following variables:
