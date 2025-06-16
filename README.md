@@ -2,6 +2,8 @@
 
 A powerful AI-powered MySQL database assistant that allows you to interact with your MySQL database using natural language. This tool uses OpenAI's Agents SDK to provide an intelligent interface for database operations.
 
+![MySQL Agent](/screenshots/init.png)
+
 ## Features
 
 - 🤖 Natural language interface for database queries
