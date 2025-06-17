@@ -17,7 +17,7 @@ except ImportError:
     print("python-dotenv not found. Install with: pip install python-dotenv")
 
 # OpenAI Agents SDK imports
-from agents import Agent, Runner, function_tool
+from agents import Agent, Runner, function_tool, trace
 
 # MySQL connection
 try:
@@ -75,7 +75,7 @@ async def execute_query(query: str) -> tuple[List[Dict[str, Any]], str]:
     try:
         async with db_pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
-                # print(f"Executing query: {query}")
+                print(f"Executing query: {query}")
                 await cursor.execute(query)
                 
                 # Handle different query types
@@ -252,8 +252,10 @@ def create_mysql_agent() -> Agent:
         3. Use execute_sql_query(query) for custom SELECT queries to answer specific questions
         4. Always explain what you're doing and format results clearly
         5. Always include the actual query results in your response, not just a summary or explanation.
-        6. If the result set is empty, explicitly state that no data was found.
-        7. If results are large, summarize key findings
+        6. Always explain what you're doing and format results clearly
+        7. If the result set is empty, explicitly state that no data was found.
+        8. If results are large, summarize key findings
+        9. Do not call the same tool with the same arguments more than once per user question; use already retrieved data if available.
 
         SQL Best Practices:
         - Use backticks around table/column names if they contain spaces or special characters
@@ -330,6 +332,8 @@ async def main():
         print("- 'Find all products with price > 100'")
         
         # Interactive loop
+        conversation_history = []
+        MAX_HISTORY = 10
         while True:
             try:
                 user_input = input("\n💬 Ask a question (or 'quit' to exit): ").strip()
@@ -340,8 +344,30 @@ async def main():
                 if not user_input:
                     continue
                 
+                # Add user message to history
+                conversation_history.append({"role": "user", "content": user_input})
+                # Limit history to last MAX_HISTORY turns (user+assistant)
+                if len(conversation_history) > MAX_HISTORY * 2:
+                    conversation_history = conversation_history[-MAX_HISTORY*2:]
+                
+                # Build the full prompt with history
+                history_prompt = ""
+                for turn in conversation_history[:-1]:  # Exclude current user input
+                    if turn["role"] == "user":
+                        history_prompt += f"User: {turn['content']}\n"
+                    else:
+                        history_prompt += f"Assistant: {turn['content']}\n"
+                history_prompt += f"User: {user_input}\nAssistant:"
+                
                 print("\n🤔 Thinking...")
-                result = await Runner.run(agent, user_input)
+                with trace("MySQL Agent"):
+                    result = await Runner.run(agent, history_prompt)
+                
+                # Add assistant response to history
+                conversation_history.append({"role": "assistant", "content": result.final_output})
+                # Limit history again in case of long responses
+                if len(conversation_history) > MAX_HISTORY * 2:
+                    conversation_history = conversation_history[-MAX_HISTORY*2:]
                 
                 # Markdown preview using rich if available
                 try:
