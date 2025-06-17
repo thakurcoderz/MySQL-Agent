@@ -239,35 +239,37 @@ def create_mysql_agent() -> Agent:
     agent = Agent(
         name="MySQL Database Assistant",
         model="gpt-4.1-nano",
-        instructions=f"""
-        You are a helpful MySQL database assistant for the '{database_config.get('database', 'unknown')}' database.
-            IMPORTANT SAFETY RULES:
-            - You can only execute SELECT, SHOW, and DESCRIBE queries for safety
-            - Always use LIMIT in SELECT queries to avoid overwhelming results (e.g., LIMIT 10)
-            - Be careful with table and column names - they are case-sensitive in MySQL
+        instructions=f"""You are a helpful MySQL database assistant for the '{database_config.get('database', 'unknown')}' database.
 
-            When users ask questions about data:
-            1. Use list_tables() to see available tables if unsure about the database schema
-            2. Use describe_table(table_name) or get_table_info(table_name) to understand table structure
-            3. Use execute_sql_query(query) for custom SELECT queries to answer specific questions
-            4. Always explain what you're doing and format results clearly
-            5. If results are large, summarize key findings
+IMPORTANT SAFETY RULES:
+- You can only execute SELECT, SHOW, and DESCRIBE queries for safety
+- Always use LIMIT in SELECT queries to avoid overwhelming results (e.g., LIMIT 10)
+- Be careful with table and column names - they are case-sensitive in MySQL
 
-            SQL Best Practices:
-            - Use backticks around table/column names if they contain spaces or special characters
-            - Use LIMIT to control result size (default to LIMIT 20 for large tables)
-            - For text searches, use LIKE with wildcards (%)
-            - Use proper WHERE clauses to filter data effectively
-            - For dates, use proper MySQL date functions
+When users ask questions about data:
+1. Use list_tables() to see available tables if unsure about the database schema
+2. Use describe_table(table_name) or get_table_info(table_name) to understand table structure
+3. Use execute_sql_query(query) for custom SELECT queries to answer specific questions
+4. Always explain what you're doing and format results clearly
+5. Always include the actual query results in your response, not just a summary or explanation.
+6. If the result set is empty, explicitly state that no data was found.
+7. If results are large, summarize key findings
 
-            Example queries:
-            - "SELECT * FROM users LIMIT 10"
-            - "SELECT COUNT(*) FROM orders WHERE order_date >= '2024-01-01'"
-            - "SHOW COLUMNS FROM products"
+SQL Best Practices:
+- Use backticks around table/column names if they contain spaces or special characters
+- Use LIMIT to control result size (default to LIMIT 20 for large tables)
+- For text searches, use LIKE with wildcards (%)
+- Use proper WHERE clauses to filter data effectively
+- For dates, use proper MySQL date functions
 
-        Current database: {database_config.get('database', 'unknown')}
-        Host: {database_config.get('host', 'unknown')}
-        """,
+Example queries:
+- "SELECT * FROM users LIMIT 10"
+- "SELECT COUNT(*) FROM orders WHERE order_date >= '2024-01-01'"
+- "SHOW COLUMNS FROM products"
+
+Current database: {database_config.get('database', 'unknown')}
+Host: {database_config.get('host', 'unknown')}
+""",
         tools=[execute_sql_query, describe_table, list_tables, get_table_info]
     )
     
@@ -340,7 +342,15 @@ async def main():
                 
                 print("\n🤔 Thinking...")
                 result = await Runner.run(agent, user_input)
-                print(f"\n🤖 Response:\n{result.final_output}")
+                
+                # Markdown preview using rich if available
+                try:
+                    from rich.console import Console
+                    from rich.markdown import Markdown
+                    console = Console()
+                    console.print(Markdown(result.final_output))
+                except ImportError:
+                    print(f"\n🤖 Response:\n{result.final_output}")
                 
             except KeyboardInterrupt:
                 break

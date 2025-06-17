@@ -1,3 +1,4 @@
 openai-agents
 aiomysql
 python-dotenv
+rich
