@@ -75,7 +75,7 @@ async def execute_query(query: str) -> tuple[List[Dict[str, Any]], str]:
     try:
         async with db_pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
-                print(f"Executing query: {query}")
+                # print(f"Executing query: {query}")
                 await cursor.execute(query)
                 
                 # Handle different query types
