@@ -75,6 +75,7 @@ async def execute_query(query: str) -> tuple[List[Dict[str, Any]], str]:
     try:
         async with db_pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
+                # print(f"Executing query: {query}")
                 await cursor.execute(query)
                 
                 # Handle different query types
@@ -136,6 +137,8 @@ def format_query_results(results: List[Dict[str, Any]], status: str) -> str:
         formatted += f"\n... and {len(results) - len(display_results)} more rows\n"
     
     formatted += f"\nTotal rows: {len(results)}"
+
+    # print(formatted)
     
     return formatted
 
@@ -164,19 +167,24 @@ async def execute_sql_query(query: str) -> str:
 @function_tool
 async def describe_table(table_name: str) -> str:
     """
-    Get the structure/schema of a specific table.
+    Get the structure/schema of a specific table, including column comments.
     
     Args:
         table_name: Name of the table to describe
     
     Returns:
-        Table structure information
+        Table structure information with comments
     """
     # Sanitize table name to prevent SQL injection
     if not table_name.replace('_', '').replace('-', '').isalnum():
         return "❌ Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed."
     
-    query = f"DESCRIBE `{table_name}`"
+    db_name = database_config.get('database', '')
+    query = (
+        "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA, COLUMN_COMMENT "
+        "FROM INFORMATION_SCHEMA.COLUMNS "
+        f"WHERE TABLE_SCHEMA = '{db_name}' AND TABLE_NAME = '{table_name}'"
+    )
     results, status = await execute_query(query)
     return format_query_results(results, status)
 
