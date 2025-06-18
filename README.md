@@ -89,23 +89,9 @@ The assistant includes robust error handling for:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
-
-[Add your license here]
-
 ## Disclaimer
 
 This tool is designed for database exploration and querying. It enforces strict safety measures to prevent destructive operations. Always ensure you have proper backups of your database before using any database tools.
-
-## Optional: Beautiful Markdown Preview in CLI
-
-For a beautifully rendered Markdown preview of agent responses in your terminal, install the [rich](https://github.com/Textualize/rich) library:
-
-```bash
-pip install rich
-```
-
-If rich is installed, the agent's responses will be shown as formatted Markdown in your CLI. Otherwise, plain text output will be used.
 
 ## Conversation History & Follow-up Questions
 
