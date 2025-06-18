@@ -239,7 +239,8 @@ def create_mysql_agent() -> Agent:
     agent = Agent(
         name="MySQL Database Assistant",
         model="gpt-4.1-nano",
-        instructions=f"""You are a helpful MySQL database assistant for the '{database_config.get('database', 'unknown')}' database.
+        instructions=f"""
+        You are a helpful MySQL database assistant for the '{database_config.get('database', 'unknown')}' database.
 
         IMPORTANT SAFETY RULES:
         - You can only execute SELECT, SHOW, and DESCRIBE queries for safety
@@ -271,7 +272,7 @@ def create_mysql_agent() -> Agent:
 
         Current database: {database_config.get('database', 'unknown')}
         Host: {database_config.get('host', 'unknown')}
-""",
+        """,
         tools=[execute_sql_query, describe_table, list_tables, get_table_info]
     )
     

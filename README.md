@@ -105,4 +105,17 @@ For a beautifully rendered Markdown preview of agent responses in your terminal,
 pip install rich
 ```
 
-If rich is installed, the agent's responses will be shown as formatted Markdown in your CLI. Otherwise, plain text output will be used. 
+If rich is installed, the agent's responses will be shown as formatted Markdown in your CLI. Otherwise, plain text output will be used.
+
+## Conversation History & Follow-up Questions
+
+The MySQL Database Assistant now supports context-aware, multi-turn conversations. This means you can ask follow-up questions and the agent will remember the last several turns of your conversation, allowing for more natural and productive interactions.
+
+- The assistant maintains a history of the last 10 user and assistant turns.
+- Each new question is answered in the context of the previous conversation, so you can ask things like:
+  - "Show me the structure of the users table."
+  - "Now show me the first 5 rows from it."
+  - "What about the orders table?"
+- This enables seamless, context-rich database exploration.
+
+No special configuration is needed—just ask your questions as you would in a real conversation! 
