@@ -161,6 +161,11 @@ async def execute_sql_query(query: str) -> str:
         if keyword in query_upper:
             return f"❌ Query contains forbidden keyword '{keyword}'. Only SELECT, SHOW, and DESCRIBE queries are allowed for safety."
     
+    # If SELECT and no LIMIT, add LIMIT 20
+    if query_upper.startswith("SELECT") and "LIMIT" not in query_upper:
+        query = query.rstrip("; \n")
+        query += " LIMIT 20"
+    
     results, status = await execute_query(query)
     return format_query_results(results, status)
 

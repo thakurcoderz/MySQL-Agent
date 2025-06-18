@@ -53,6 +53,8 @@ python mysql_mcp_agent.py
 
 The assistant will connect to your MySQL database and provide an interactive prompt where you can ask questions about your data.
 
+> **Note:** All SELECT queries are automatically limited to 20 results for efficiency, even if you do not specify a LIMIT clause.
+
 ### Example Questions
 
 - "What tables are in the database?"
@@ -65,6 +67,7 @@ The assistant will connect to your MySQL database and provide an interactive pro
 ## Safety Features
 
 - Only SELECT, SHOW, and DESCRIBE queries are allowed
+- **All SELECT queries are automatically limited to 20 results if no LIMIT is specified**
 - Automatic query result limiting (20 rows by default)
 - SQL injection protection
 - Table name sanitization
