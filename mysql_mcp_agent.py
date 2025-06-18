@@ -8,6 +8,7 @@ import asyncio
 import os
 from typing import Any, Dict, List, Optional
 import logging
+import re
 
 # Load environment variables from .env file
 try:
@@ -158,10 +159,11 @@ async def execute_sql_query(query: str) -> str:
     query_upper = query.upper().strip()
     
     for keyword in forbidden_keywords:
-        if keyword in query_upper:
+        # Use regex to match the keyword as a whole word, case-insensitive
+        if re.search(rf"\\b{keyword}\\b", query, re.IGNORECASE):
             return f"❌ Query contains forbidden keyword '{keyword}'. Only SELECT, SHOW, and DESCRIBE queries are allowed for safety."
     
-    # If SELECT and no LIMIT, add LIMIT 20
+    # If SELECT and no LIMIT, add LIMIT 20 (uncomment if you want this logic)
     # if query_upper.startswith("SELECT") and "LIMIT" not in query_upper:
     #     query = query.rstrip("; \n")
     #     query += " LIMIT 20"
