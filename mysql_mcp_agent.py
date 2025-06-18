@@ -340,6 +340,9 @@ async def main():
         # Interactive loop
         conversation_history = []
         MAX_HISTORY = 10
+        from rich.console import Console
+        from rich.markdown import Markdown
+        console = Console()
         while True:
             try:
                 user_input = input("\n💬 Ask a question (or 'quit' to exit): ").strip()
@@ -375,14 +378,9 @@ async def main():
                 if len(conversation_history) > MAX_HISTORY * 2:
                     conversation_history = conversation_history[-MAX_HISTORY*2:]
                 
-                # Markdown preview using rich if available
-                try:
-                    from rich.console import Console
-                    from rich.markdown import Markdown
-                    console = Console()
-                    console.print(Markdown(result.final_output))
-                except ImportError:
-                    print(f"\n🤖 Response:\n{result.final_output}")
+                # Show only assistant answer as Markdown, with a separator between each message pair
+                console.print(Markdown(result.final_output))
+                console.rule("[grey50]")
                 
             except KeyboardInterrupt:
                 break
