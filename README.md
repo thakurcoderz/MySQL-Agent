@@ -53,6 +53,11 @@ python mysql_mcp_agent.py
 
 The assistant will connect to your MySQL database and provide an interactive prompt where you can ask questions about your data.
 
+> **Tip:** Run with the `--query` flag to print every SQL query executed to the CLI for transparency and debugging:
+> ```bash
+> python mysql_mcp_agent.py --query
+> ```
+
 > **Note:** All SELECT queries are automatically limited to 20 results for efficiency, even if you do not specify a LIMIT clause.
 
 ### Example Questions

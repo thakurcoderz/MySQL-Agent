@@ -9,6 +9,7 @@ import os
 from typing import Any, Dict, List, Optional
 import logging
 import re
+import argparse
 
 # Load environment variables from .env file
 try:
@@ -66,7 +67,7 @@ async def setup_mysql_connection(mysql_config: Dict[str, str]) -> bool:
         print(f"❌ Failed to connect to MySQL: {e}")
         return False
 
-async def execute_query(query: str) -> tuple[List[Dict[str, Any]], str]:
+async def execute_query(query: str, show_query: bool = False) -> tuple[List[Dict[str, Any]], str]:
     """Execute a query and return results with status"""
     global db_pool
     
@@ -76,7 +77,8 @@ async def execute_query(query: str) -> tuple[List[Dict[str, Any]], str]:
     try:
         async with db_pool.acquire() as conn:
             async with conn.cursor(aiomysql.DictCursor) as cursor:
-                # print(f"Executing query: {query}")
+                if show_query:
+                    print(f"Executing query: {query}")
                 await cursor.execute(query)
                 
                 # Handle different query types
@@ -160,7 +162,7 @@ async def execute_sql_query(query: str) -> str:
     
     for keyword in forbidden_keywords:
         # Use regex to match the keyword as a whole word, case-insensitive
-        if re.search(rf"\\b{keyword}\\b", query, re.IGNORECASE):
+        if re.search(rf"\b{keyword}\b", query, re.IGNORECASE):
             return f"❌ Query contains forbidden keyword '{keyword}'. Only SELECT, SHOW, and DESCRIBE queries are allowed for safety."
     
     # If SELECT and no LIMIT, add LIMIT 20 (uncomment if you want this logic)
@@ -168,7 +170,7 @@ async def execute_sql_query(query: str) -> str:
     #     query = query.rstrip("; \n")
     #     query += " LIMIT 20"
     
-    results, status = await execute_query(query)
+    results, status = await execute_query(query, show_query=SHOW_QUERY)
     return format_query_results(results, status)
 
 @function_tool
@@ -192,7 +194,7 @@ async def describe_table(table_name: str) -> str:
         "FROM INFORMATION_SCHEMA.COLUMNS "
         f"WHERE TABLE_SCHEMA = '{db_name}' AND TABLE_NAME = '{table_name}'"
     )
-    results, status = await execute_query(query)
+    results, status = await execute_query(query, show_query=SHOW_QUERY)
     return format_query_results(results, status)
 
 @function_tool
@@ -204,7 +206,7 @@ async def list_tables() -> str:
         List of all tables in the database
     """
     query = "SHOW TABLES"
-    results, status = await execute_query(query)
+    results, status = await execute_query(query, show_query=SHOW_QUERY)
     return format_query_results(results, status)
 
 @function_tool
@@ -223,10 +225,10 @@ async def get_table_info(table_name: str) -> str:
         return "❌ Invalid table name. Only alphanumeric characters, underscores, and hyphens are allowed."
     
     # Get table structure
-    describe_results, describe_status = await execute_query(f"DESCRIBE `{table_name}`")
+    describe_results, describe_status = await execute_query(f"DESCRIBE `{table_name}`", show_query=SHOW_QUERY)
     
     # Get row count
-    count_results, count_status = await execute_query(f"SELECT COUNT(*) as row_count FROM `{table_name}`")
+    count_results, count_status = await execute_query(f"SELECT COUNT(*) as row_count FROM `{table_name}`", show_query=SHOW_QUERY)
     
     # Format response
     response = f"📊 Table Information: {table_name}\n\n"
@@ -297,6 +299,13 @@ async def cleanup():
 async def main():
     """Main function to run the MySQL Agent"""
     
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="MySQL Database Assistant")
+    parser.add_argument('--query', action='store_true', help='Print each SQL query being executed')
+    args = parser.parse_args()
+    global SHOW_QUERY
+    SHOW_QUERY = args.query
+
     # MySQL configuration from environment variables
     mysql_config = {
         "host": os.getenv("MYSQL_HOST", "localhost"),
