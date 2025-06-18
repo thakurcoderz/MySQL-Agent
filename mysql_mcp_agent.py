@@ -162,9 +162,9 @@ async def execute_sql_query(query: str) -> str:
             return f"❌ Query contains forbidden keyword '{keyword}'. Only SELECT, SHOW, and DESCRIBE queries are allowed for safety."
     
     # If SELECT and no LIMIT, add LIMIT 20
-    if query_upper.startswith("SELECT") and "LIMIT" not in query_upper:
-        query = query.rstrip("; \n")
-        query += " LIMIT 20"
+    # if query_upper.startswith("SELECT") and "LIMIT" not in query_upper:
+    #     query = query.rstrip("; \n")
+    #     query += " LIMIT 20"
     
     results, status = await execute_query(query)
     return format_query_results(results, status)
@@ -262,6 +262,7 @@ def create_mysql_agent() -> Agent:
         7. If the result set is empty, explicitly state that no data was found.
         8. If results are large, summarize key findings
         9. Do not call the same tool with the same arguments more than once per user question; use already retrieved data if available.
+        10. If a user asks about a table or concept that does not exactly match a table name, reason about possible related or similarly named tables (e.g., 'activities' might mean 'user_events' or 'reactions'). Explain your reasoning to the user before proceeding with the query.
 
         SQL Best Practices:
         - Use backticks around table/column names if they contain spaces or special characters
