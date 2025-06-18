@@ -85,14 +85,6 @@ The assistant includes robust error handling for:
 - Missing configuration
 - API errors
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Disclaimer
-
-This tool is designed for database exploration and querying. It enforces strict safety measures to prevent destructive operations. Always ensure you have proper backups of your database before using any database tools.
-
 ## Conversation History & Follow-up Questions
 
 The MySQL Database Assistant now supports context-aware, multi-turn conversations. This means you can ask follow-up questions and the agent will remember the last several turns of your conversation, allowing for more natural and productive interactions.
@@ -104,4 +96,12 @@ The MySQL Database Assistant now supports context-aware, multi-turn conversation
   - "What about the orders table?"
 - This enables seamless, context-rich database exploration.
 
-No special configuration is needed—just ask your questions as you would in a real conversation! 
+No special configuration is needed—just ask your questions as you would in a real conversation!
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Disclaimer
+
+This tool is designed for database exploration and querying. It enforces strict safety measures to prevent destructive operations. Always ensure you have proper backups of your database before using any database tools. 
